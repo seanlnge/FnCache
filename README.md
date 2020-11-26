@@ -43,3 +43,65 @@ fn.set('isEven', divBy2, "Check if given argument is even", (err, data) => {
     console.log(data);
 })
 ```
+
+***
+## Test Programs
+**Random String Generator**
+```js
+const fn = require('@spicyspices/fncache');
+
+async function main(){
+    await fn('index.js', 'fn');
+
+    let str = '';
+    for(let i = 0; i < 8; i++){
+        let random = fn.randomInt(65, 122);
+        str += fn.intToChar(random);
+    }
+
+    console.log(str);
+}
+
+main();
+```
+
+**Creating a Sleep Function**
+```js
+const fn = require('@spicyspices/fncache');
+
+async function main(){
+    await fn('index.js', 'fn');
+
+    fn.set('sleep', sleep, 'An asynchronous function that only finishes once a timespan (ms) has passed', (err, data) => {
+        if(err) throw err;
+        console.log(data);
+    });
+}
+
+function sleep(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+main();
+```
+
+**Simulating a Roll of Die**
+```js
+const fn = require('@spicyspices/fncache');
+
+async function main(){
+    await fn('index.js', 'fn');
+
+    let sides = 20;
+    let amount = 4;
+    let rolls = [];
+
+    for(let i = 0; i < amount; i++){
+        rolls.push(fn.randomInt(1, 20));
+    }
+
+    console.log(rolls);
+}
+
+main();
+```
