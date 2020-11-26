@@ -19,9 +19,9 @@ We can then add a require or import statement into the code
 ```js
 const fn = require('@spicyspices/fncache');
 ```
-After that, we need to use await on a starter FnCache function, with a parameter being the node file that is running.
+After that, we need to use await on a starter FnCache function, with a parameter being the node file that is running, and the variable that FnCache is saved to.
 ```js
-await fn('index.js');
+await fn('index.js', 'fn');
 ```
 With that done, we can use any function in the FnCache library.
 ```js
