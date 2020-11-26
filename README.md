@@ -7,7 +7,7 @@ The node package manager is a great tool, it allows for entire scripts of code t
 Take an example, imagine a user is trying to create a 3 dimensional rendering engine. There are many things to calculate, rotation matrices, 3d points to ordered pairs on a screen - the point is that there are many functions that need to be created for a simple creation. The user would also like these functions to be written with utmost precision and speed. A solution for all of these problems would be **FnCache**.
 ***
 ## What is FnCache
-FnCache is an NPM package and website with the purpose of being an easy way to retrieve small functions without the trouble of going through the process of installing NPM packages. It is basically the node package manager, but for smaller functions and with more ease. Need to check if a number is prime using the quickest known algorithm? `fn.isPrime(22679)` BOOM, there is a function for that. Need to send a GET request to your server? `fn.getRequest(url)` BOOM, a function for that.
+FnCache is an NPM package and website with the purpose of being an easy way to retrieve small functions without the trouble of going through the process of installing NPM packages. It is basically the node package manager, but for smaller functions and with more ease. Need to check if a number is prime using the quickest known algorithm? `fn.isPrime(22679)` BOOM, someone made a function for that. Need to send a GET request to your server? `fn.getRequest(url)` BOOM, a function for that.
 
 Any function that can be written is a function that can be created in FnCache. No matter whether it is asynchronous, returns a value, or takes 10 minutes to resolve, any function can be added to FnCache, even ones containing other functions.
 
@@ -20,7 +20,7 @@ We can then add a require or import statement into the code
 ```js
 const fn = require('@spicyspices/fncache');
 ```
-After that, we need to use await on a starter FnCache function, with a parameter being the node file that is running, and the variable that FnCache is saved to.
+After that, we need to use await on a starter FnCache function, with the first parameter being the node file that is running, and the other being the variable that FnCache is saved to.
 ```js
 await fn('index.js', 'fn');
 ```
@@ -43,7 +43,9 @@ fn.set('isEven', divBy2, "Check if given argument is even", (err, data) => {
     console.log(data);
 })
 ```
-
+***
+## How it Works
+FnCache is an online service, meaning it has a server. This server stores information such as the code, the parameters, and the number of downloads, to view on [the website](https://Code-Jam-10.spicedspices.repl.co), and to send to users. Obviously, the client is not going to be able to store the tens of thousands of possible functions, that would be many megabytes of data, and this is where the Cache in FnCache comes in. The package `@spicyspices/fncache` will first start by scanning the main Node.js file to look for possible `fn` functions that might be called; this is in the `await fn('index.js', 'fn');` method. After collecting the possible functions, it will send a request to the server to get the code for those functions. It will store these into another file and format the functions plus the `module.exports = {}` to allow Node.js to recognize them as a script. The package will then use `require('');` on the file, and copy the functions into the global `fn` object. For speed however, only during the caching process, the package will use `eval()` to set the functions into the `fn` object, and synchronously format the file. During any other times that the code might be ran, the package will use the other file with the cached functions for ease and speed.
 ***
 ## Test Programs
 **Random String Generator**
