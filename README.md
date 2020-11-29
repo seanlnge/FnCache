@@ -45,7 +45,7 @@ fn.set('isEven', divBy2, "Check if given argument is even", (err, data) => {
 ```
 ***
 ## How it Works
-FnCache is an online service, meaning it has a server. This server stores information such as the code, the parameters, and the number of downloads, to view on [the website](https://Code-Jam-10.spicedspices.repl.co), and to send to users. Obviously, the client is not going to be able to store the tens of thousands of possible functions, that would be many megabytes of data, and this is where the Cache in FnCache comes in. The package `@spicyspices/fncache` will first start by scanning the main Node.js file to look for possible `fn` functions that might be called; this is in the `await fn('index.js', 'fn');` method. After collecting the possible functions, it will send a request to the server to get the code for those functions. It will store these into another file and format the functions plus the `module.exports = {}` to allow Node.js to recognize them as a script. The package will then use `require('');` on the file, and copy the functions into the global `fn` object. For speed however, only during the caching process, the package will use `eval()` to set the functions into the `fn` object, and synchronously format the file. During any other times that the code might be ran, the package will use the other file with the cached functions for ease and speed.
+FnCache is an online service, meaning it has a server. This server stores information such as the code, the parameters, and the number of downloads, to view on [the website](https://Code-Jam-10.spicedspices.repl.co), and to send to users. Obviously, the client is not going to be able to store the tens of thousands of possible functions, that would be many megabytes of data, and this is where the Cache in FnCache comes in. The package `@spicyspices/fncache` will first start by scanning the main Node.js file to look for possible `fn` functions that might be called; this is in the `await fn('index.js', 'fn');` method. After collecting the possible functions, it will send a request to the server to get the code for those functions. It will store these into another file and format the functions plus the `module.exports = {}` to allow Node.js to recognize them as a script. The package will then use `require('');` on the file, and copy the functions into the global `fn` object. For speed however, only during the caching process, the package will use `eval()` to set the functions into the `fn` object, and synchronously format the file while the rest of the code is running. During any other times that the code might be ran, the package will use the other file with the cached functions for ease and speed.
 ***
 ## Test Programs
 **Random String Generator**
@@ -87,7 +87,7 @@ function sleep(ms){
 main();
 ```
 
-**Simulating a Roll of Die**
+**Simulating a Roll of Dice**
 ```js
 const fn = require('@spicyspices/fncache');
 
