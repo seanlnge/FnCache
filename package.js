@@ -1,12 +1,13 @@
 const fetch = require('node-fetch');
 const fs = require('fs');
+const { dirname } = require('path');
 
 function createFolder(){
     return new Promise(resolve => {
-        fs.mkdir('functions', (err) => {
+        fs.mkdir('./fncache', (err) => {
             if(err) throw err;
 
-            fs.writeFile('./functions/all.js', 'module.exports = {};', (err) => {
+            fs.writeFile('./fncache/all.js', 'module.exports = {};', (err) => {
                 if(err) throw err;
                 resolve();
             });
@@ -25,12 +26,12 @@ async function functions(fileName, varName){
     if(!varName) varName = 0;
 
     // Read lines of code to find functions
-    let URL = './functions/all.js';
+    let URL = './fncache/all.js';
     let code = fs.readFileSync(fileName, { encoding: 'utf-8' });
     code = code.replace(/\n|\r/g, '');
 
     // Check to find if all needed folders/files exist
-    let exists =  fs.existsSync('./functions');
+    let exists =  fs.existsSync('./fncache');
     if(!exists) await createFolder();
     let fexists = fs.existsSync(URL);
     if(!fexists) fs.writeFileSync(URL, 'module.exports = {};');
@@ -44,22 +45,21 @@ async function functions(fileName, varName){
     for(let func of funcSplit){
 
         // Split code into characters
-        let splitF = func.split('');
-        let name = [];
+        let name = '';
         let add = true;
 
         // Loop over characters
-        for(let i=0; i<splitF.length; i++){
+        for(let i=0; i<func.length; i++){
             
             // If calling function
-            if(splitF[i] == '('){
-                funcs.push(name.join(''));
+            if(func[i] == '('){
+                funcs.push(name);
 
             // If alphanumeric
-            } else if(splitF[i].match(/^[0-9a-zA-Z]+$/)){
-                name.push(splitF[i]);
+            } else if(func[i].match(/^[0-9a-zA-Z]+$/)){
+                name += func[i];
             
-            // If not true name
+            // If not true break
             } else {
                 add = false;
                 break;
@@ -72,10 +72,20 @@ async function functions(fileName, varName){
 
 
     // Loop over functions
-    let priorFns = require('./functions/all');
+    let proper = __dirname.replace(/\\/g, '/').split('/').slice(0, -3).join('/') + '/fncache/all';
+    let priorFns = require(proper);
 
     for(let i=0; i<funcs.length; i++){
+        
+        // Remove duplicates
+        let shouldBreak = false;
+        for(let j=i+1; j<funcs.length; j++){
+            if(funcs[i] == funcs[j]){ shouldBreak = true; break; }
+        }
+        if(shouldBreak) continue;
+
         let func = funcs[i];
+        if(func === 'set') continue;
 
         // Check if function exists in folder
         if(priorFns[func]){
@@ -105,8 +115,10 @@ async function functions(fileName, varName){
 
 
         // Use eval to write functions for code run
+        code = code.trim();
         let insides = code.split('{').slice(1).join('{').split('}').slice(0, -1).join('}');
         let params = '';
+        let async = code.split(' ')[0] == 'async' ? 'async' : '';
 
         // Loop through to find params
         let val = 1;
@@ -119,9 +131,36 @@ async function functions(fileName, varName){
         }
 
         // Evaluate function
-        eval(`functions.${func} = (${params}) => {
+        eval(`functions.${func} = ${async}(${params}) => {
             ${insides}
         }`)
+    }
+
+    /**
+     * @param {String} name What should this function be called
+     * @param {Function} func Function object name
+     * @param {Function?} callback Run after completed (err, data)
+     */
+    functions.set = async(name, func, description, callback) => {
+        let data = await fetch('https://Code-Jam-10.spicedspices.repl.co/create/js/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'   
+            },
+            body: JSON.stringify({
+                func: name,
+                code: func.toString(),
+                description: description
+            })
+        }).then(res => res.json());
+
+        if(callback){
+            callback(data.error, data);
+        } else {
+            if(data.error) throw data.error;
+            return data;
+        }
+
     }
 }
 
@@ -136,16 +175,11 @@ async function fetchCode(name){
         'https://Code-Jam-10.spicedspices.repl.co/function/js/' + name
     ).then(res => res.json());
 
-
-    // Check for errors
-    if(data.error){
-        console.log('\nError when grabbing function:\n', data);
-        process.exit(1);
-
     // Return code for file
-    } else {
+    if(data.status == 200){
         return data.code;
     }
+
 }
 
 module.exports = functions;
